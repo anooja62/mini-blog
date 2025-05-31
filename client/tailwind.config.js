@@ -1,12 +1,12 @@
 // tailwind.config.js
 module.exports = {
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['Montserrat', 'ui-sans-serif', 'system-ui'], // Override default sans font stack
-        },
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Montserrat', 'ui-sans-serif', 'system-ui'],
       },
     },
-    // other configs ...
-  }
-  
+  },
+  plugins: [require('@tailwindcss/line-clamp')],
+
+};

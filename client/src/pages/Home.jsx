@@ -2,7 +2,7 @@ import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useAuth } from "../context/AuthContext";
 import axios from "../api/axiosInstance";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
 
 export default function Home() {
@@ -12,10 +12,11 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [editId, setEditId] = useState(null);
+  const [expandedPostId, setExpandedPostId] = useState(null);
 
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [loadingDeleteId, setLoadingDeleteId] = useState(null); // track which post is deleting
+  const [loadingDeleteId, setLoadingDeleteId] = useState(null); 
 
   const [error, setError] = useState(null);
 
@@ -33,10 +34,20 @@ export default function Home() {
     }
   };
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    console.log("token", token);
+
+    if (!token) {
+      navigate('/login', { replace: true });
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchPosts();
   }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoadingSubmit(true);
@@ -185,7 +196,22 @@ export default function Home() {
                   <h4 className="text-xl font-bold mb-2 text-[#2C3E50] group-hover:text-[#B28DFF] transition-colors">
                     {post.title}
                   </h4>
-                  <p className="text-sm text-gray-600 mb-4">{post.content}</p>
+                  <p className={`text-sm text-gray-600 mb-2 transition-all ${
+  expandedPostId === post._id ? '' : 'line-clamp-4'
+}`}>
+  {post.content}
+</p>
+{post.content.length > 150 && (
+  <button
+    onClick={() =>
+      setExpandedPostId(expandedPostId === post._id ? null : post._id)
+    }
+    className="text-sm text-[#B28DFF] hover:underline mt-auto"
+  >
+    {expandedPostId === post._id ? 'Show Less' : 'Read More'}
+  </button>
+)}
+
                 </div>
               </div>
             ))}
