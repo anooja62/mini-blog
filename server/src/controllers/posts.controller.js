@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { createNewPost, getUserPosts, deleteUserPost } from "../services/posts.service.js";
+import { createNewPost, getUserPosts, deleteUserPost, updateUserPost } from "../services/posts.service.js";
 
 const postSchema = Joi.object({
     title: Joi.string().required(),
@@ -26,6 +26,24 @@ export const getPosts = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+export const updatePost = async (req, res) => {
+    const postSchema = Joi.object({
+        title: Joi.string().required(),
+        content: Joi.string().required()
+    });
+
+    const { error, value } = postSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details.map(e => e.message) });
+
+    try {
+        const updated = await updateUserPost(req.user.id, req.params.id, value);
+        res.status(200).json({ message: "Post updated", post: updated });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
 
 export const deletePost = async (req, res) => {
     try {
