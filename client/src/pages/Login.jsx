@@ -22,21 +22,31 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row font-sans">
       {/* Image Section */}
-      <div className="hidden md:block md:w-1/2">
-        <img src={blogImg} alt="ScribbleSpace Illustration" className="w-full h-full object-contain" />
+      <div className="w-full md:w-1/2 flex justify-center items-center">
+        {/* Show smaller image on mobile, larger on md+ */}
+        <img
+          src={blogImg}
+          alt="ScribbleSpace Illustration"
+          className="w-3/4 max-w-sm md:max-w-none md:w-full h-auto object-contain"
+        />
       </div>
 
       {/* Form Section */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-6 bg-gradient-to-br from-[#FFF5F3] via-[#FFEAEA] to-[#FFDCDC]">
-        <form onSubmit={handleLogin} className="bg-white rounded-xl shadow-lg w-full max-w-md p-8 space-y-6">
-          <h2 className="text-lg text-center text-gray-700">Login to your account</h2>
+      <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 bg-white">
+        <form
+          onSubmit={handleLogin}
+          className="w-full max-w-md p-6 md:p-8 space-y-6 bg-white rounded-xl shadow-lg"
+        >
+          <h2 className="text-xl md:text-2xl text-center text-gray-700 font-semibold">
+            Login to your account
+          </h2>
 
           <input
             type="email"
             placeholder="Email"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#B28DFF]"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#B28DFF] placeholder-gray-400 text-base"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -44,7 +54,7 @@ export default function Login() {
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#B28DFF]"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#B28DFF] placeholder-gray-400 text-base"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -57,7 +67,9 @@ export default function Login() {
           </button>
           <p className="text-center text-sm text-gray-500">
             Don’t have an account?{' '}
-            <a href="/register" className="text-[#B28DFF] underline">Register</a>
+            <a href="/register" className="text-[#B28DFF] underline">
+              Register
+            </a>
           </p>
         </form>
       </div>

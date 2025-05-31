@@ -13,8 +13,34 @@ export default function Home() {
   const [content, setContent] = useState("");
   const [editId, setEditId] = useState(null);
 
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [loadingDeleteId, setLoadingDeleteId] = useState(null); // track which post is deleting
+
+  const [error, setError] = useState(null);
+
+  const fetchPosts = async () => {
+    setLoadingPosts(true);
+    setError(null);
+    try {
+      const res = await axios.get("/posts");
+      setPosts(res.data);
+    } catch (err) {
+      setError("Failed to fetch posts.");
+      console.error("Failed to fetch posts:", err);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoadingSubmit(true);
+    setError(null);
     try {
       if (editId) {
         await axios.put(`/posts/${editId}`, { title, content });
@@ -25,35 +51,29 @@ export default function Home() {
       setTitle("");
       setContent("");
       setEditId(null);
-      const res = await axios.get("/posts");
-      setPosts(res.data);
+      await fetchPosts();
     } catch (err) {
+      setError("Failed to save post.");
       console.error("Error saving post:", err);
-      alert("Failed to save post");
+    } finally {
+      setLoadingSubmit(false);
     }
   };
+
   const handleDelete = async (postId) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
+    setLoadingDeleteId(postId);
+    setError(null);
     try {
       await axios.delete(`/posts/${postId}`);
       setPosts(posts.filter((post) => post._id !== postId));
     } catch (err) {
+      setError("Error deleting post.");
       console.error("Failed to delete post:", err);
-      alert("Error deleting post");
+    } finally {
+      setLoadingDeleteId(null);
     }
   };
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await axios.get("/posts");
-        setPosts(res.data);
-      } catch (err) {
-        console.error("Failed to fetch posts:", err);
-      }
-    };
-    fetchPosts();
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FDF6F3] via-[#FFEFEF] to-[#FFE3E3] text-gray-800 font-sans">
@@ -72,7 +92,11 @@ export default function Home() {
           </button>
           {user ? (
             <button
-              onClick={logout}
+              onClick={() => {
+                if (window.confirm("Are you sure you want to logout?")) {
+                  logout();
+                }
+              }}
               className="text-gray-600 hover:text-[#B28DFF]"
             >
               Logout
@@ -86,11 +110,11 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="text-center px-6 py-16 bg-gradient-to-r from-[#FFF5F3] via-[#FFEAEA] to-[#FFDCDC]">
+      <section className="text-center px-6 py-16 bg-gradient-to-r from-[#FFF5F3] via-[#FFEAEA] to-[#FFDCDC] font-sans">
         <h2 className="text-4xl font-extrabold mb-4">
           Share your stories with the world
         </h2>
-        <p className="text-gray-600 max-w-xl mx-auto">
+        <p className="text-gray-600 max-w-xl mx-auto text-xs">
           Whether it's a quick thought or a detailed tutorial, LetsBlog helps
           you express yourself and connect with others.
         </p>
@@ -102,63 +126,75 @@ export default function Home() {
         </button>
       </section>
 
+      {/* Error Message */}
+      {error && (
+        <div className="max-w-6xl mx-auto px-4 py-2 mb-4 text-center text-red-600 font-semibold">
+          {error}
+        </div>
+      )}
+
       {/* Posts */}
       <section className="max-w-6xl mx-auto px-4 py-12">
         <h3 className="text-2xl font-semibold mb-6 text-center">
           Latest Posts
         </h3>
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.length > 0 ? (
-            posts.map((post) => (
-              <Link
-                to={`/posts/${post._id}`}
+
+        {loadingPosts ? (
+          <div className="flex justify-center py-12">
+            <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+          </div>
+        ) : posts.length > 0 ? (
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => (
+              <div
                 key={post._id}
-                className="group relative"
+                className="relative bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 h-full flex flex-col"
               >
-                <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
-                  <div className="absolute top-2 right-2 flex gap-2 z-10">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setTitle(post.title);
-                        setContent(post.content);
-                        setEditId(post._id); // track which post we're editing
-                        setIsOpen(true);
-                      }}
-                      className="text-[#B28DFF] hover:text-[#9D7FFF]"
-                    >
-                      <Pencil size={18} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleDelete(post._id);
-                      }}
-                      className="text-red-400 hover:text-red-600"
-                    >
+                <div className="absolute top-2 right-2 flex gap-2 z-10">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setTitle(post.title);
+                      setContent(post.content);
+                      setEditId(post._id);
+                      setIsOpen(true);
+                    }}
+                    className="text-[#B28DFF] hover:text-[#9D7FFF]"
+                    disabled={loadingDeleteId === post._id}
+                    aria-label="Edit post"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDelete(post._id);
+                    }}
+                    className="text-red-400 hover:text-red-600 flex items-center justify-center"
+                    disabled={loadingDeleteId === post._id}
+                    aria-label="Delete post"
+                  >
+                    {loadingDeleteId === post._id ? (
+                      <div className="loader ease-linear rounded-full border-4 border-t-4 border-red-300 h-5 w-5"></div>
+                    ) : (
                       <Trash2 size={18} />
-                    </button>
-                  </div>
-                  <div className="p-6 flex flex-col justify-between flex-grow">
-                    <h4 className="text-xl font-bold mb-2 text-[#2C3E50] group-hover:text-[#B28DFF] transition-colors">
-                      {post.title}
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {post.content.slice(0, 100)}...
-                    </p>
-                    <span className="mt-auto text-sm font-medium text-[#B28DFF]">
-                      Read More →
-                    </span>
-                  </div>
+                    )}
+                  </button>
                 </div>
-              </Link>
-            ))
-          ) : (
-            <p className="text-center text-gray-500 col-span-full">
-              No posts yet. Be the first to write one!
-            </p>
-          )}
-        </div>
+                <div className="p-6 flex flex-col justify-between flex-grow">
+                  <h4 className="text-xl font-bold mb-2 text-[#2C3E50] group-hover:text-[#B28DFF] transition-colors">
+                    {post.title}
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-4">{post.content}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 col-span-full">
+            No posts yet. Be the first to write one!
+          </p>
+        )}
       </section>
 
       {/* Modal for Post Creation */}
@@ -167,10 +203,13 @@ export default function Home() {
           as="div"
           className="relative z-10"
           onClose={() => {
-            setIsOpen(false);
-            setEditId(null);
-            setTitle("");
-            setContent("");
+            if (!loadingSubmit) {
+              setIsOpen(false);
+              setEditId(null);
+              setTitle("");
+              setContent("");
+              setError(null);
+            }
           }}
         >
           <Transition.Child
@@ -189,8 +228,10 @@ export default function Home() {
             <div className="flex min-h-full items-center justify-center p-4">
               <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title className="text-lg font-bold leading-6 text-[#B28DFF]">
-                  Create New Post
+                  {editId ? "Edit Post" : "Create New Post"}
                 </Dialog.Title>
+
+                {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
 
                 <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                   <input
@@ -200,6 +241,7 @@ export default function Home() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
+                    disabled={loadingSubmit}
                   />
                   <textarea
                     placeholder="Write your story..."
@@ -207,25 +249,34 @@ export default function Home() {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     required
+                    disabled={loadingSubmit}
                   />
                   <div className="flex justify-end gap-2">
                     <button
                       type="button"
                       onClick={() => {
-                        setIsOpen(false);
-                        setEditId(null);
-                        setTitle("");
-                        setContent("");
+                        if (!loadingSubmit) {
+                          setIsOpen(false);
+                          setEditId(null);
+                          setTitle("");
+                          setContent("");
+                          setError(null);
+                        }
                       }}
                       className="px-4 py-2 text-sm text-gray-500 bg-gray-100 rounded-md hover:bg-gray-200"
+                      disabled={loadingSubmit}
                     >
                       Cancel
                     </button>
 
                     <button
                       type="submit"
-                      className="px-4 py-2 text-sm font-semibold text-white bg-[#B28DFF] rounded-md hover:bg-[#A08CFF]"
+                      className="px-4 py-2 text-sm font-semibold text-white bg-[#B28DFF] rounded-md hover:bg-[#A08CFF] flex items-center gap-2 justify-center"
+                      disabled={loadingSubmit}
                     >
+                      {loadingSubmit && (
+                        <div className="loader ease-linear rounded-full border-4 border-t-4 border-white h-5 w-5 animate-spin"></div>
+                      )}
                       Publish
                     </button>
                   </div>
@@ -235,6 +286,17 @@ export default function Home() {
           </div>
         </Dialog>
       </Transition>
+
+      {/* Loader CSS */}
+      <style>{`
+        .loader {
+          border-top-color: #6366f1; /* Tailwind indigo-500 */
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

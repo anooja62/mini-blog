@@ -19,13 +19,13 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5F3] via-[#FFEAEA] to-[#FFDCDC] flex justify-center items-center px-4">
+    <div className="min-h-screen flex justify-center items-center px-4">
       <form onSubmit={handleRegister} className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md space-y-6">
         <h2 className="text-3xl font-bold text-center text-gray-700">Register</h2>
         <input
           type="text"
           placeholder="Username"
-          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B28DFF]"
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B28DFF] placeholder-gray-400"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
@@ -33,7 +33,7 @@ export default function Register() {
         <input
           type="email"
           placeholder="Email"
-          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B28DFF]"
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B28DFF] placeholder-gray-400"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -41,7 +41,7 @@ export default function Register() {
         <input
           type="password"
           placeholder="Password"
-          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B28DFF]"
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B28DFF] placeholder-gray-400"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
