@@ -26,6 +26,6 @@ app.use("/api/posts", authMiddleware, postRoutes);
 
 export default app;
 app.get("/", (req, res) => {
-    res.send("Welcome to the CloudX API");
+    res.send("Welcome to the mini-blog API");
 });
 

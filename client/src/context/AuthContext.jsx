@@ -6,11 +6,11 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Load user from localStorage on mount
+  
     const token = localStorage.getItem('token');
     if (token) {
-      // Decode token if needed or assume login (adjust based on your backend)
-      setUser({ token }); // You can decode to get user info if JWT contains it
+     
+      setUser({ token }); 
     }
   }, []);
 

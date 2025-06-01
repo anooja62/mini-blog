@@ -16,7 +16,7 @@ export default function Home() {
 
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [loadingDeleteId, setLoadingDeleteId] = useState(null); 
+  const [loadingDeleteId, setLoadingDeleteId] = useState(null);
 
   const [error, setError] = useState(null);
 
@@ -37,11 +37,11 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     console.log("token", token);
 
     if (!token) {
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
     }
   }, [user]);
 
@@ -196,22 +196,25 @@ export default function Home() {
                   <h4 className="text-xl font-bold mb-2 text-[#2C3E50] group-hover:text-[#B28DFF] transition-colors">
                     {post.title}
                   </h4>
-                  <p className={`text-sm text-gray-600 mb-2 transition-all ${
-  expandedPostId === post._id ? '' : 'line-clamp-4'
-}`}>
-  {post.content}
-</p>
-{post.content.length > 150 && (
-  <button
-    onClick={() =>
-      setExpandedPostId(expandedPostId === post._id ? null : post._id)
-    }
-    className="text-sm text-[#B28DFF] hover:underline mt-auto"
-  >
-    {expandedPostId === post._id ? 'Show Less' : 'Read More'}
-  </button>
-)}
-
+                  <p
+                    className={`text-sm text-gray-600 mb-2 transition-all ${
+                      expandedPostId === post._id ? "" : "line-clamp-4"
+                    }`}
+                  >
+                    {post.content}
+                  </p>
+                  {post.content.length > 150 && (
+                    <button
+                      onClick={() =>
+                        setExpandedPostId(
+                          expandedPostId === post._id ? null : post._id
+                        )
+                      }
+                      className="text-sm text-[#B28DFF] hover:underline mt-auto"
+                    >
+                      {expandedPostId === post._id ? "Show Less" : "Read More"}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
